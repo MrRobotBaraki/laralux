@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LaraLux.DZ — Bed Covers</title>
+<meta name="description" content="LaraLux.DZ — luxury bed covers. Order online with delivery.">
+<link rel="icon" href="img/logo-small.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Loading -->
+<div id="view-loading" class="view center-screen">
+  <img src="img/logo.png" alt="LaraLux.DZ" class="spin-logo">
+</div>
+
+<!-- Login -->
+<section id="view-login" class="view hidden">
+  <div class="login-wrap">
+    <div class="login-brand" style="background-image:url('img/brand.jpg')"></div>
+    <form id="login-form" class="login-card" autocomplete="on">
+      <img src="img/logo.png" alt="LaraLux.DZ logo" class="login-logo">
+      <h1>LaraLux<span class="gold">.DZ</span></h1>
+      <p class="muted">Sign in to continue</p>
+      <label>Username
+        <input id="login-user" name="username" autocomplete="username" required>
+      </label>
+      <label>Password
+        <input id="login-pass" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="btn btn-gold btn-block" type="submit" id="login-btn">Sign in</button>
+      <p id="login-error" class="error" role="alert"></p>
+    </form>
+  </div>
+</section>
+
+<!-- Top bar (shared) -->
+<header id="topbar" class="topbar hidden">
+  <div class="brand"><img src="img/logo-small.jpg" alt=""><span>LaraLux<span class="gold">.DZ</span></span></div>
+  <div class="topbar-right">
+    <span id="who" class="pill"></span>
+    <button class="btn btn-ghost" id="logout-btn">Sign out</button>
+  </div>
+</header>
+
+<!-- Client shop -->
+<main id="view-shop" class="view hidden">
+  <div class="hero" style="background-image:url('img/background.jpg')"></div>
+
+  <div class="container shop-layout">
+    <section>
+      <h2 class="section-title">Our bed covers</h2>
+      <p class="muted">Tap a model to add it to your order. You can choose one or several.</p>
+      <div id="shop-grid" class="grid"></div>
+      <p id="shop-empty" class="empty hidden">No models available right now.</p>
+    </section>
+
+    <aside class="cart card">
+      <h2 class="section-title">Your order</h2>
+      <div id="cart-items"></div>
+      <p id="cart-empty" class="muted">No model selected yet.</p>
+
+      <form id="order-form">
+        <label>Full name<input id="c-name" required autocomplete="name"></label>
+        <label>Phone<input id="c-phone" type="tel" required autocomplete="tel" placeholder="05xx xx xx xx"></label>
+        <label>Address<textarea id="c-address" rows="2" required autocomplete="street-address" placeholder="Wilaya, city, street…"></textarea></label>
+
+        <div class="totals">
+          <div><span>Subtotal</span><span id="t-sub">0</span></div>
+          <div><span>Delivery</span><span id="t-del">0</span></div>
+          <div class="total"><span>Total</span><span id="t-total">0</span></div>
+        </div>
+        <p id="order-hint" class="muted small"></p>
+        <button class="btn btn-gold btn-block hidden" type="submit" id="confirm-btn">Confirm order</button>
+        <p id="order-error" class="error" role="alert"></p>
+      </form>
+    </aside>
+  </div>
+</main>
+
+<!-- Admin -->
+<main id="view-admin" class="view hidden">
+  <div class="container">
+    <nav class="tabs">
+      <button class="tab active" data-tab="orders">Orders <span id="new-count" class="badge hidden"></span></button>
+      <button class="tab" data-tab="models">Models</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
+
+    <section id="tab-orders" class="tab-panel">
+      <div class="row-between">
+        <h2 class="section-title">Orders</h2>
+        <select id="order-filter">
+          <option value="all">All orders</option>
+          <option value="new">New</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </div>
+      <div id="orders-list"></div>
+      <p id="orders-empty" class="empty hidden">No orders yet.</p>
+    </section>
+
+    <section id="tab-models" class="tab-panel hidden">
+      <h2 class="section-title">Add a model</h2>
+      <form id="model-form" class="card model-form">
+        <label>Model name<input id="m-name" required placeholder="e.g. Black Grid"></label>
+        <label>Price<input id="m-price" type="number" min="0" step="1" required></label>
+        <label>Quantity in stock<input id="m-stock" type="number" min="0" step="1" required></label>
+        <label>Size<input id="m-size" placeholder="e.g. 220 × 240 cm, 2 pillow covers"></label>
+        <label>Colors<input id="m-colors" placeholder="e.g. Black / White"></label>
+        <label>Description<textarea id="m-desc" rows="2" placeholder="Fabric, what's included…"></textarea></label>
+        <label>Picture<input id="m-image" type="file" accept="image/*" required></label>
+        <img id="m-preview" class="preview hidden" alt="Preview">
+        <button class="btn btn-gold" type="submit" id="m-submit">Add model</button>
+        <p id="m-error" class="error"></p>
+      </form>
+
+      <h2 class="section-title">All models</h2>
+      <p class="muted small">Models with price 0 are hidden from clients until you set a price.</p>
+      <div id="admin-models" class="admin-models"></div>
+    </section>
+
+    <section id="tab-settings" class="tab-panel hidden">
+      <h2 class="section-title">Shop settings</h2>
+      <form id="settings-form" class="card model-form">
+        <label>Delivery price<input id="s-delivery" type="number" min="0" step="1" required></label>
+        <label>Currency<input id="s-currency" required></label>
+        <button class="btn btn-gold" type="submit">Save settings</button>
+        <p id="s-msg" class="muted small"></p>
+      </form>
+    </section>
+  </div>
+</main>
+
+<!-- Order success dialog -->
+<div id="success" class="overlay hidden">
+  <div class="card success-card">
+    <img src="img/logo.png" alt="" class="success-logo">
+    <h2>Thank you!</h2>
+    <p>Your order has been received. We will call you soon to confirm delivery.</p>
+    <p class="muted small" id="success-ref"></p>
+    <button class="btn btn-gold" id="success-ok">Continue</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
