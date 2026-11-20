@@ -5,7 +5,7 @@ import {
   getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy, runTransaction, writeBatch, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, LOGIN_DOMAIN, ADMIN_USERNAME } from "./firebase-config.js";
+import { firebaseConfig, LOGIN_DOMAIN, ADMIN_USERNAME } from "./firebase-config.js?v=2";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -71,7 +71,7 @@ function watchSettings() {
 $("login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const user = $("login-user").value.trim().toLowerCase();
-  const pass = $("login-pass").value;
+  const pass = $("login-pass").value.trim();
   $("login-error").textContent = "";
   $("login-btn").disabled = true;
   try {
@@ -80,7 +80,10 @@ $("login-form").addEventListener("submit", async (e) => {
     $("login-error").textContent =
       err.code === "auth/too-many-requests" ? "Too many attempts. Please wait a moment and try again."
       : err.code === "auth/network-request-failed" ? "No internet connection."
-      : "Wrong username or password.";
+      : ["auth/invalid-credential", "auth/invalid-login-credentials", "auth/wrong-password",
+         "auth/user-not-found", "auth/invalid-email"].includes(err.code)
+        ? "Wrong username or password."
+        : "Login problem (" + (err.code || err.message) + "). Please refresh the page and try again.";
   } finally {
     $("login-btn").disabled = false;
   }
