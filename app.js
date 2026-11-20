@@ -5,7 +5,7 @@ import {
   getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy, runTransaction, writeBatch, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, LOGIN_DOMAIN, ADMIN_USERNAME } from "./firebase-config.js?v=4";
+import { firebaseConfig, LOGIN_DOMAIN, ADMIN_USERNAME } from "./firebase-config.js?v=5";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -389,7 +389,7 @@ function renderOrders() {
       <div class="customer">
         <div><b>Phone:</b> <a href="tel:${esc(o.customer?.phone)}">${esc(o.customer?.phone)}</a></div>
         <div><b>State:</b> ${esc(o.customer?.wilaya || "—")}</div>
-        <div><b>Address:</b> ${esc(o.customer?.address)}</div>
+        <div class="info"><b>Address &amp; info:</b> ${esc(o.customer?.address)}</div>
       </div>
       <div class="order-items">
         ${(o.items || []).map((i) => `
