@@ -100,7 +100,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--plum-500); 
   .shop-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
   .hero { height: 90px; }
   .shop-scroll .section-title { font-size: 22px; margin-top: 10px; }
-  .cart { min-width: 0; max-height: 60vh; max-height: 60dvh; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 18px rgba(42,22,56,.14); }
+  .cart { min-width: 0; max-height: 56vh; max-height: 56dvh; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 18px rgba(42,22,56,.14); }
   .cart-body { padding: 10px 16px 0; }
   .cart-foot { padding: 8px 16px 10px; }
   .cart-title { font-size: 20px; margin-bottom: 4px; }
