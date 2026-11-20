@@ -1,11 +1,11 @@
-﻿import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy, runTransaction, writeBatch, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, LOGIN_DOMAIN, ADMIN_USERNAME } from "./firebase-config.js?v=3";
+import { firebaseConfig, LOGIN_DOMAIN, ADMIN_USERNAME } from "./firebase-config.js?v=4";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -21,12 +21,12 @@ let settings = { deliveryFee: 800, currency: "DA", deliveryPrices: {} };
 const DEFAULT_PRICE = 2500;
 
 // The 58 wilayas of Algeria
-const WILAYAS = ["Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "BÃ©jaÃ¯a", "Biskra", "BÃ©char", "Blida",
-  "Bouira", "Tamanrasset", "TÃ©bessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "SÃ©tif",
-  "SaÃ¯da", "Skikda", "Sidi Bel AbbÃ¨s", "Annaba", "Guelma", "Constantine", "MÃ©dÃ©a", "Mostaganem", "M'Sila",
-  "Mascara", "Ouargla", "Oran", "El Bayadh", "Illizi", "Bordj Bou ArrÃ©ridj", "BoumerdÃ¨s", "El Tarf", "Tindouf",
-  "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "AÃ¯n Defla", "NaÃ¢ma", "AÃ¯n TÃ©mouchent",
-  "GhardaÃ¯a", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", "BÃ©ni AbbÃ¨s", "In Salah",
+const WILAYAS = ["Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida",
+  "Bouira", "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif",
+  "Saïda", "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila",
+  "Mascara", "Ouargla", "Oran", "El Bayadh", "Illizi", "Bordj Bou Arréridj", "Boumerdès", "El Tarf", "Tindouf",
+  "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent",
+  "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", "Béni Abbès", "In Salah",
   "In Guezzam", "Touggourt", "Djanet", "El M'Ghair", "El Meniaa"]
   .map((name, i) => ({ code: String(i + 1).padStart(2, "0"), name }));
 const wilayaLabel = (code) => { const w = WILAYAS.find((x) => x.code === code); return w ? `${w.code} - ${w.name}` : ""; };
@@ -128,7 +128,7 @@ let renderWilayaPrices = null;
 function renderWilayaOptions() {
   const sel = $("c-wilaya");
   const current = sel.value;
-  sel.innerHTML = `<option value="">â€” Choose your state â€”</option>` + WILAYAS.map((w) =>
+  sel.innerHTML = `<option value="">— Choose your state —</option>` + WILAYAS.map((w) =>
     `<option value="${w.code}">${w.code} - ${esc(w.name)} (delivery ${money(deliveryFor(w.code))})</option>`).join("");
   sel.value = current;
 }
@@ -153,10 +153,10 @@ function renderShop() {
   $("shop-grid").innerHTML = models.map((m) => {
     const sold = m.stock <= 0;
     const sel = cart.has(m.id);
-    const details = [m.size, m.colors].filter(Boolean).map(esc).join(" Â· ");
+    const details = [m.size, m.colors].filter(Boolean).map(esc).join(" · ");
     return `
       <article class="model ${sold ? "soldout" : ""} ${sel ? "selected" : ""}" data-id="${m.id}" tabindex="0" role="button" aria-pressed="${sel}">
-        ${sel ? `<span class="check">âœ“</span>` : ""}
+        ${sel ? `<span class="check">✓</span>` : ""}
         <img src="${esc(m.image)}" alt="${esc(m.name)}" loading="lazy">
         <div class="model-body">
           <div class="model-name">${esc(m.name)}</div>
@@ -209,9 +209,9 @@ renderCart = function () {
   $("cart-items").innerHTML = items.map(({ m, qty }) => `
     <div class="cart-item">
       <img src="${esc(m.thumb || m.image)}" alt="">
-      <div><div class="nm">${esc(m.name)}</div><div class="small muted">${money(m.price)} Ã— ${qty}</div></div>
+      <div><div class="nm">${esc(m.name)}</div><div class="small muted">${money(m.price)} × ${qty}</div></div>
       <div class="qty">
-        <button type="button" data-act="minus" data-id="${m.id}" aria-label="Less">âˆ’</button>
+        <button type="button" data-act="minus" data-id="${m.id}" aria-label="Less">−</button>
         <span>${qty}</span>
         <button type="button" data-act="plus" data-id="${m.id}" aria-label="More">+</button>
       </div>
@@ -241,7 +241,7 @@ $("order-form").addEventListener("submit", async (e) => {
   if (!cart.size) return;
   const btn = $("confirm-btn");
   btn.disabled = true;
-  btn.textContent = "Sendingâ€¦";
+  btn.textContent = "Sending…";
   $("order-error").textContent = "";
   const orderRef = doc(collection(db, "orders"));
   try {
@@ -333,7 +333,7 @@ $("p-all-btn").addEventListener("click", async () => {
     adminModels.forEach((m) => batch.update(doc(db, "models", m.id), { price }));
     batch.set(doc(db, "settings", "shop"), { defaultPrice: price }, { merge: true });
     await batch.commit();
-    $("p-msg").textContent = `All models now cost ${money(price)} âœ“`;
+    $("p-msg").textContent = `All models now cost ${money(price)} ✓`;
   } catch (err) { $("p-msg").textContent = err.message; }
   finally { btn.disabled = false; }
 });
@@ -384,11 +384,11 @@ function renderOrders() {
       <div class="order-head">
         <h3>${esc(o.customer?.name)}</h3>
         <div><span class="status ${esc(o.status)}">${o.status === "new" ? "New" : "Delivered"}</span>
-          <span class="small muted">&nbsp;${fmtDate(o.createdAt)} Â· #${o.id.slice(0, 8).toUpperCase()}</span></div>
+          <span class="small muted">&nbsp;${fmtDate(o.createdAt)} · #${o.id.slice(0, 8).toUpperCase()}</span></div>
       </div>
       <div class="customer">
         <div><b>Phone:</b> <a href="tel:${esc(o.customer?.phone)}">${esc(o.customer?.phone)}</a></div>
-        <div><b>State:</b> ${esc(o.customer?.wilaya || "â€”")}</div>
+        <div><b>State:</b> ${esc(o.customer?.wilaya || "—")}</div>
         <div><b>Address:</b> ${esc(o.customer?.address)}</div>
       </div>
       <div class="order-items">
@@ -396,8 +396,8 @@ function renderOrders() {
           <div class="order-item">
             <img src="${esc(i.thumb)}" alt="${esc(i.name)}">
             <div><div><b>${esc(i.name)}</b></div>
-              ${i.size || i.colors ? `<div class="small muted">${esc([i.size, i.colors].filter(Boolean).join(" Â· "))}</div>` : ""}
-              <div class="small">${i.qty} Ã— ${cur(i.price)}</div></div>
+              ${i.size || i.colors ? `<div class="small muted">${esc([i.size, i.colors].filter(Boolean).join(" · "))}</div>` : ""}
+              <div class="small">${i.qty} × ${cur(i.price)}</div></div>
           </div>`).join("")}
       </div>
       <div class="order-foot">
@@ -518,7 +518,7 @@ $("settings-form").addEventListener("submit", async (e) => {
     });
     await updateDoc(doc(db, "settings", "shop"), { deliveryPrices, currency: $("s-currency").value.trim() || "DA" });
     pricesDirty = false;
-    $("s-msg").textContent = "Delivery prices saved âœ“";
+    $("s-msg").textContent = "Delivery prices saved ✓";
     setTimeout(() => ($("s-msg").textContent = ""), 2000);
   } catch (err) { $("s-msg").textContent = err.message; }
 });
