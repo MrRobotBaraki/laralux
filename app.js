@@ -1,11 +1,11 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+﻿import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy, runTransaction, writeBatch, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, LOGIN_DOMAIN, ADMIN_USERNAME } from "./firebase-config.js?v=2";
+import { firebaseConfig, LOGIN_DOMAIN, ADMIN_USERNAME } from "./firebase-config.js?v=3";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -17,7 +17,23 @@ const STARTER_MODEL_COUNT = 29;
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-let settings = { deliveryFee: 800, currency: "DA" };
+let settings = { deliveryFee: 800, currency: "DA", deliveryPrices: {} };
+const DEFAULT_PRICE = 2500;
+
+// The 58 wilayas of Algeria
+const WILAYAS = ["Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "BÃ©jaÃ¯a", "Biskra", "BÃ©char", "Blida",
+  "Bouira", "Tamanrasset", "TÃ©bessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "SÃ©tif",
+  "SaÃ¯da", "Skikda", "Sidi Bel AbbÃ¨s", "Annaba", "Guelma", "Constantine", "MÃ©dÃ©a", "Mostaganem", "M'Sila",
+  "Mascara", "Ouargla", "Oran", "El Bayadh", "Illizi", "Bordj Bou ArrÃ©ridj", "BoumerdÃ¨s", "El Tarf", "Tindouf",
+  "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "AÃ¯n Defla", "NaÃ¢ma", "AÃ¯n TÃ©mouchent",
+  "GhardaÃ¯a", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", "BÃ©ni AbbÃ¨s", "In Salah",
+  "In Guezzam", "Touggourt", "Djanet", "El M'Ghair", "El Meniaa"]
+  .map((name, i) => ({ code: String(i + 1).padStart(2, "0"), name }));
+const wilayaLabel = (code) => { const w = WILAYAS.find((x) => x.code === code); return w ? `${w.code} - ${w.name}` : ""; };
+const deliveryFor = (code) => {
+  const p = settings.deliveryPrices?.[code];
+  return Number(p ?? settings.deliveryFee ?? 0) || 0;
+};
 const money = (n) => `${Number(n || 0).toLocaleString("fr-FR")} ${settings.currency}`;
 let unsubs = [];
 const clearSubs = () => { unsubs.forEach((u) => u()); unsubs = []; };
@@ -63,7 +79,9 @@ const makeImages = async (file) => ({
 function watchSettings() {
   unsubs.push(onSnapshot(doc(db, "settings", "shop"), (s) => {
     if (s.exists()) settings = { ...settings, ...s.data() };
+    renderWilayaOptions();
     renderCart?.();
+    renderWilayaPrices?.();
   }));
 }
 
@@ -105,6 +123,15 @@ onAuthStateChanged(auth, (user) => {
 let models = [];
 const cart = new Map(); // modelId -> qty
 let renderCart = null;
+let renderWilayaPrices = null;
+
+function renderWilayaOptions() {
+  const sel = $("c-wilaya");
+  const current = sel.value;
+  sel.innerHTML = `<option value="">â€” Choose your state â€”</option>` + WILAYAS.map((w) =>
+    `<option value="${w.code}">${w.code} - ${esc(w.name)} (delivery ${money(deliveryFor(w.code))})</option>`).join("");
+  sel.value = current;
+}
 
 function startShop() {
   show("view-shop");
@@ -126,10 +153,10 @@ function renderShop() {
   $("shop-grid").innerHTML = models.map((m) => {
     const sold = m.stock <= 0;
     const sel = cart.has(m.id);
-    const details = [m.size, m.colors].filter(Boolean).map(esc).join(" · ");
+    const details = [m.size, m.colors].filter(Boolean).map(esc).join(" Â· ");
     return `
       <article class="model ${sold ? "soldout" : ""} ${sel ? "selected" : ""}" data-id="${m.id}" tabindex="0" role="button" aria-pressed="${sel}">
-        ${sel ? `<span class="check">✓</span>` : ""}
+        ${sel ? `<span class="check">âœ“</span>` : ""}
         <img src="${esc(m.image)}" alt="${esc(m.name)}" loading="lazy">
         <div class="model-body">
           <div class="model-name">${esc(m.name)}</div>
@@ -182,36 +209,39 @@ renderCart = function () {
   $("cart-items").innerHTML = items.map(({ m, qty }) => `
     <div class="cart-item">
       <img src="${esc(m.thumb || m.image)}" alt="">
-      <div><div class="nm">${esc(m.name)}</div><div class="small muted">${money(m.price)} × ${qty}</div></div>
+      <div><div class="nm">${esc(m.name)}</div><div class="small muted">${money(m.price)} Ã— ${qty}</div></div>
       <div class="qty">
-        <button type="button" data-act="minus" data-id="${m.id}" aria-label="Less">−</button>
+        <button type="button" data-act="minus" data-id="${m.id}" aria-label="Less">âˆ’</button>
         <span>${qty}</span>
         <button type="button" data-act="plus" data-id="${m.id}" aria-label="More">+</button>
       </div>
     </div>`).join("");
 
   const sub = items.reduce((s, i) => s + i.m.price * i.qty, 0);
-  const del = items.length ? Number(settings.deliveryFee || 0) : 0;
+  const wilaya = $("c-wilaya").value;
+  const del = wilaya ? deliveryFor(wilaya) : 0;
   $("t-sub").textContent = money(sub);
-  $("t-del").textContent = money(del);
-  $("t-total").textContent = money(sub + del);
+  $("t-del").textContent = wilaya ? `${money(del)} (${WILAYAS.find((w) => w.code === wilaya).name})` : "choose your state";
+  $("t-total").textContent = money(sub + (items.length ? del : 0));
 
   const missing = [];
   if (!items.length) missing.push("choose at least one model");
   if (!$("c-name").value.trim()) missing.push("your name");
   if (!phoneOk($("c-phone").value)) missing.push("a valid phone");
+  if (!wilaya) missing.push("your state");
   if (!$("c-address").value.trim()) missing.push("your address");
   $("order-hint").textContent = missing.length ? "To confirm, please add: " + missing.join(", ") + "." : "";
   $("confirm-btn").classList.toggle("hidden", missing.length > 0);
 };
-for (const id of ["c-name", "c-phone", "c-address"]) $(id).addEventListener("input", () => renderCart());
+for (const id of ["c-name", "c-phone", "c-address", "c-wilaya"]) $(id).addEventListener("input", () => renderCart());
+$("c-wilaya").addEventListener("change", () => renderCart());
 
 $("order-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!cart.size) return;
   const btn = $("confirm-btn");
   btn.disabled = true;
-  btn.textContent = "Sending…";
+  btn.textContent = "Sendingâ€¦";
   $("order-error").textContent = "";
   const orderRef = doc(collection(db, "orders"));
   try {
@@ -230,9 +260,12 @@ $("order-form").addEventListener("submit", async (e) => {
       });
       snaps.forEach((s, i) => tx.update(refs[i], { stock: s.data().stock - entries[i][1] }));
       const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-      const delivery = Number(settings.deliveryFee || 0);
+      const wilaya = $("c-wilaya").value;
+      if (!wilaya) throw new Error("Please choose your state.");
+      const delivery = deliveryFor(wilaya);
       tx.set(orderRef, {
-        customer: { name: $("c-name").value.trim(), phone: $("c-phone").value.trim(), address: $("c-address").value.trim() },
+        customer: { name: $("c-name").value.trim(), phone: $("c-phone").value.trim(),
+                    wilaya: wilayaLabel(wilaya), address: $("c-address").value.trim() },
         items, subtotal, delivery, total: subtotal + delivery, currency: settings.currency,
         status: "new", createdAt: serverTimestamp(),
       });
@@ -269,12 +302,41 @@ async function startAdmin() {
     adminModels = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderAdminModels();
   }));
-  unsubs.push(onSnapshot(doc(db, "settings", "shop"), (s) => {
-    const d = s.data() || settings;
-    $("s-delivery").value = d.deliveryFee ?? "";
-    $("s-currency").value = d.currency ?? "";
-  }));
+  pricesDirty = false;
+  renderWilayaPrices();
 }
+
+// ---------- settings: delivery prices per wilaya ----------
+let pricesDirty = false; // don't overwrite what the admin is typing
+renderWilayaPrices = function () {
+  if ($("view-admin").classList.contains("hidden") || pricesDirty) return;
+  $("s-currency").value = settings.currency ?? "DA";
+  $("wilaya-prices").innerHTML = WILAYAS.map((w) => `
+    <label><span>${w.code} - ${esc(w.name)}</span>
+      <input type="number" min="0" step="1" data-w="${w.code}" value="${deliveryFor(w.code)}"></label>`).join("");
+};
+$("settings-form").addEventListener("input", () => { pricesDirty = true; });
+$("d-all-btn").addEventListener("click", () => {
+  const v = $("d-all").value;
+  if (v === "") return;
+  pricesDirty = true;
+  document.querySelectorAll("#wilaya-prices input").forEach((i) => (i.value = v));
+});
+
+$("p-all-btn").addEventListener("click", async () => {
+  const price = Math.max(0, Number($("p-all").value) || 0);
+  if (!confirm(`Set the price of all ${adminModels.length} models to ${money(price)}?`)) return;
+  const btn = $("p-all-btn");
+  btn.disabled = true;
+  try {
+    const batch = writeBatch(db);
+    adminModels.forEach((m) => batch.update(doc(db, "models", m.id), { price }));
+    batch.set(doc(db, "settings", "shop"), { defaultPrice: price }, { merge: true });
+    await batch.commit();
+    $("p-msg").textContent = `All models now cost ${money(price)} âœ“`;
+  } catch (err) { $("p-msg").textContent = err.message; }
+  finally { btn.disabled = false; }
+});
 
 // First admin login: create settings and load the 29 models from img/models/
 async function ensureStarterData() {
@@ -284,7 +346,7 @@ async function ensureStarterData() {
   const batch = writeBatch(db);
   for (let i = 1; i <= STARTER_MODEL_COUNT; i++) {
     batch.set(doc(db, "models", `c${i}`), {
-      name: `Model ${i}`, price: 0, stock: 10, size: "", colors: "", description: "",
+      name: `Model ${i}`, price: DEFAULT_PRICE, stock: 10, size: "", colors: "", description: "",
       image: `img/models/c${i}.jpg`, thumb: `img/models/c${i}.jpg`, order: i, createdAt: serverTimestamp(),
     });
   }
@@ -322,10 +384,11 @@ function renderOrders() {
       <div class="order-head">
         <h3>${esc(o.customer?.name)}</h3>
         <div><span class="status ${esc(o.status)}">${o.status === "new" ? "New" : "Delivered"}</span>
-          <span class="small muted">&nbsp;${fmtDate(o.createdAt)} · #${o.id.slice(0, 8).toUpperCase()}</span></div>
+          <span class="small muted">&nbsp;${fmtDate(o.createdAt)} Â· #${o.id.slice(0, 8).toUpperCase()}</span></div>
       </div>
       <div class="customer">
         <div><b>Phone:</b> <a href="tel:${esc(o.customer?.phone)}">${esc(o.customer?.phone)}</a></div>
+        <div><b>State:</b> ${esc(o.customer?.wilaya || "â€”")}</div>
         <div><b>Address:</b> ${esc(o.customer?.address)}</div>
       </div>
       <div class="order-items">
@@ -333,8 +396,8 @@ function renderOrders() {
           <div class="order-item">
             <img src="${esc(i.thumb)}" alt="${esc(i.name)}">
             <div><div><b>${esc(i.name)}</b></div>
-              ${i.size || i.colors ? `<div class="small muted">${esc([i.size, i.colors].filter(Boolean).join(" · "))}</div>` : ""}
-              <div class="small">${i.qty} × ${cur(i.price)}</div></div>
+              ${i.size || i.colors ? `<div class="small muted">${esc([i.size, i.colors].filter(Boolean).join(" Â· "))}</div>` : ""}
+              <div class="small">${i.qty} Ã— ${cur(i.price)}</div></div>
           </div>`).join("")}
       </div>
       <div class="order-foot">
@@ -449,11 +512,13 @@ $("model-form").addEventListener("submit", async (e) => {
 $("settings-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    await setDoc(doc(db, "settings", "shop"), {
-      deliveryFee: Math.max(0, Number($("s-delivery").value) || 0),
-      currency: $("s-currency").value.trim() || "DA",
-    }, { merge: true });
-    $("s-msg").textContent = "Saved ✓";
+    const deliveryPrices = {};
+    document.querySelectorAll("#wilaya-prices input").forEach((i) => {
+      deliveryPrices[i.dataset.w] = Math.max(0, Math.floor(Number(i.value) || 0));
+    });
+    await updateDoc(doc(db, "settings", "shop"), { deliveryPrices, currency: $("s-currency").value.trim() || "DA" });
+    pricesDirty = false;
+    $("s-msg").textContent = "Delivery prices saved âœ“";
     setTimeout(() => ($("s-msg").textContent = ""), 2000);
   } catch (err) { $("s-msg").textContent = err.message; }
 });
