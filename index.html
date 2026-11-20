@@ -1,14 +1,14 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LaraLux.DZ — Bed Covers</title>
-<meta name="description" content="LaraLux.DZ — luxury bed covers. Order online with delivery.">
+<title>LaraLux.DZ â€” Bed Covers</title>
+<meta name="description" content="LaraLux.DZ â€” luxury bed covers. Order online with delivery.">
 <link rel="icon" href="img/logo-small.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=3">
 <meta http-equiv="Cache-Control" content="no-cache">
 </head>
 <body>
@@ -67,7 +67,10 @@
       <form id="order-form">
         <label>Full name<input id="c-name" required autocomplete="name"></label>
         <label>Phone<input id="c-phone" type="tel" required autocomplete="tel" placeholder="05xx xx xx xx"></label>
-        <label>Address<textarea id="c-address" rows="2" required autocomplete="street-address" placeholder="Wilaya, city, street…"></textarea></label>
+        <label>State (Wilaya)
+          <select id="c-wilaya" required><option value="">â€” Choose your state â€”</option></select>
+        </label>
+        <label>Address<textarea id="c-address" rows="2" required autocomplete="street-address" placeholder="City, street, houseâ€¦"></textarea></label>
 
         <div class="totals">
           <div><span>Subtotal</span><span id="t-sub">0</span></div>
@@ -108,11 +111,11 @@
       <h2 class="section-title">Add a model</h2>
       <form id="model-form" class="card model-form">
         <label>Model name<input id="m-name" required placeholder="e.g. Black Grid"></label>
-        <label>Price<input id="m-price" type="number" min="0" step="1" required></label>
+        <label>Price<input id="m-price" type="number" min="0" step="1" value="2500" required></label>
         <label>Quantity in stock<input id="m-stock" type="number" min="0" step="1" required></label>
-        <label>Size<input id="m-size" placeholder="e.g. 220 × 240 cm, 2 pillow covers"></label>
+        <label>Size<input id="m-size" placeholder="e.g. 220 Ã— 240 cm, 2 pillow covers"></label>
         <label>Colors<input id="m-colors" placeholder="e.g. Black / White"></label>
-        <label>Description<textarea id="m-desc" rows="2" placeholder="Fabric, what's included…"></textarea></label>
+        <label>Description<textarea id="m-desc" rows="2" placeholder="Fabric, what's includedâ€¦"></textarea></label>
         <label>Picture<input id="m-image" type="file" accept="image/*" required></label>
         <img id="m-preview" class="preview hidden" alt="Preview">
         <button class="btn btn-gold" type="submit" id="m-submit">Add model</button>
@@ -125,11 +128,25 @@
     </section>
 
     <section id="tab-settings" class="tab-panel hidden">
-      <h2 class="section-title">Shop settings</h2>
-      <form id="settings-form" class="card model-form">
-        <label>Delivery price<input id="s-delivery" type="number" min="0" step="1" required></label>
-        <label>Currency<input id="s-currency" required></label>
-        <button class="btn btn-gold" type="submit">Save settings</button>
+      <h2 class="section-title">Bed cover price</h2>
+      <div class="card model-form">
+        <p class="muted small" style="margin-top:0">Sets the same price on every model. You can still change one model's price in the Models tab.</p>
+        <div class="inline">
+          <label>Price for all models<input id="p-all" type="number" min="0" step="1" value="2500"></label>
+          <button class="btn btn-gold" id="p-all-btn" type="button">Apply to all models</button>
+        </div>
+        <p id="p-msg" class="muted small"></p>
+      </div>
+
+      <h2 class="section-title">Delivery price by state</h2>
+      <form id="settings-form" class="card">
+        <div class="inline">
+          <label>Set every state to<input id="d-all" type="number" min="0" step="1" placeholder="e.g. 800"></label>
+          <button class="btn btn-light" id="d-all-btn" type="button">Fill all</button>
+          <label>Currency<input id="s-currency" required></label>
+        </div>
+        <div id="wilaya-prices" class="wilaya-grid"></div>
+        <button class="btn btn-gold" type="submit">Save delivery prices</button>
         <p id="s-msg" class="muted small"></p>
       </form>
     </section>
@@ -149,6 +166,6 @@
 
 <div id="toast" class="toast hidden"></div>
 
-<script type="module" src="app.js?v=2"></script>
+<script type="module" src="app.js?v=3"></script>
 </body>
 </html>
