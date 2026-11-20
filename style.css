@@ -153,6 +153,10 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--plum-500); 
 .am-body label { margin-bottom: 8px; }
 .am-body .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .am-body .actions { display: flex; gap: 8px; justify-content: space-between; }
+.wilaya-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 4px 16px; margin: 18px 0; }
+.wilaya-grid label { display: grid; grid-template-columns: 1fr 96px; align-items: center; gap: 8px; margin: 0; padding: 4px 0; border-bottom: 1px solid var(--line); font-weight: 500; color: var(--ink); }
+.wilaya-grid input { margin: 0; padding: 6px 8px; }
+#settings-form .inline { margin-bottom: 4px; }
 .empty { text-align: center; color: var(--muted); padding: 40px 0; }
 
 /* Overlay / toast */
