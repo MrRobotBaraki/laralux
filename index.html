@@ -8,7 +8,7 @@
 <link rel="icon" href="img/logo-small.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 <meta http-equiv="Cache-Control" content="no-cache">
 </head>
 <body>
@@ -49,39 +49,42 @@
 
 <!-- Client shop -->
 <main id="view-shop" class="view hidden">
-  <div class="hero" style="background-image:url('img/background.jpg')"></div>
-
-  <div class="container shop-layout">
-    <section>
+  <div class="shop-layout">
+    <!-- Only this column scrolls -->
+    <section class="shop-scroll">
+      <div class="hero" style="background-image:url('img/background.jpg')"></div>
       <h2 class="section-title">Our bed covers</h2>
-      <p class="muted">Tap a model to add it to your order. You can choose one or several.</p>
+      <p class="muted small">Tap a model to add it to your order. You can choose one or several.</p>
       <div id="shop-grid" class="grid"></div>
       <p id="shop-empty" class="empty hidden">No models available right now.</p>
     </section>
 
-    <aside class="cart card">
-      <h2 class="section-title">Your order</h2>
-      <div id="cart-items"></div>
-      <p id="cart-empty" class="muted">No model selected yet.</p>
-
-      <form id="order-form">
-        <label>Full name<input id="c-name" required autocomplete="name"></label>
-        <label>Phone<input id="c-phone" type="tel" required autocomplete="tel" placeholder="05xx xx xx xx"></label>
+    <!-- Order panel: always visible, Confirm button pinned at the bottom -->
+    <form id="order-form" class="cart">
+      <div class="cart-body">
+        <h2 class="cart-title">Your order</h2>
+        <div id="cart-items"></div>
+        <p id="cart-empty" class="muted small">No model selected yet.</p>
+        <div class="form-two">
+          <label>Full name<input id="c-name" required autocomplete="name"></label>
+          <label>Phone<input id="c-phone" type="tel" required autocomplete="tel" placeholder="05xx xx xx xx"></label>
+        </div>
         <label>State (Wilaya)
           <select id="c-wilaya" required><option value="">— Choose your state —</option></select>
         </label>
-        <label>Address<textarea id="c-address" rows="2" required autocomplete="street-address" placeholder="City, street, house…"></textarea></label>
-
+        <label>Address &amp; other information<textarea id="c-address" rows="2" required autocomplete="street-address" placeholder="City, street, house… + any other info (preferred delivery time, color choice, notes…)"></textarea></label>
+      </div>
+      <div class="cart-foot">
         <div class="totals">
-          <div><span>Subtotal</span><span id="t-sub">0</span></div>
+          <div><span>Bed covers</span><span id="t-sub">0</span></div>
           <div><span>Delivery</span><span id="t-del">0</span></div>
           <div class="total"><span>Total</span><span id="t-total">0</span></div>
         </div>
         <p id="order-hint" class="muted small"></p>
         <button class="btn btn-gold btn-block hidden" type="submit" id="confirm-btn">Confirm order</button>
         <p id="order-error" class="error" role="alert"></p>
-      </form>
-    </aside>
+      </div>
+    </form>
   </div>
 </main>
 
@@ -166,6 +169,6 @@
 
 <div id="toast" class="toast hidden"></div>
 
-<script type="module" src="app.js?v=4"></script>
+<script type="module" src="app.js?v=5"></script>
 </body>
 </html>
